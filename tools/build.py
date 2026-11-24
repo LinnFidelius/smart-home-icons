@@ -54,6 +54,7 @@ def mono_path(src):
     # Linien in Flächen umwandeln und zu einem Pfad zusammenfassen (Format der HA-Icons)
     s = src.read_text().replace('currentColor', '#000000')
     s = re.sub(r'(<svg[^>]*?) (fill="none" stroke=[^>]*)>', r'\1><g \2>', s).replace('</svg>', '</g></svg>')
+    s = re.sub(r'<(path|rect|circle)(?![^>]*fill=)', r'<\1 fill="none"', s)
     return ' '.join(re.findall(r' d="([^"]+)"', SVG.fromstring(s).topicosvg().tostring()))
 
 names = sorted({p.stem for p in (R / 'src').glob('*/*.svg')})
