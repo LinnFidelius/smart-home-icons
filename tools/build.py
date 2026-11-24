@@ -71,7 +71,9 @@ for f in sorted((R / 'src' / 'mono').glob('*.svg')):
     for s_ in SIZES:
         out = R / 'png' / 'mono' / str(s_) / f'{f.stem}.png'; out.parent.mkdir(parents=True, exist_ok=True)
         cairosvg.svg2png(bytestring=f.read_text().replace('currentColor', '#000000').encode(), write_to=str(out), output_width=s_, output_height=s_)
+VERSION = (R / 'VERSION').read_text().strip()
 js = ('// Smart-Home-Icons für Home Assistant – automatisch erzeugt von tools/build.py\n'
+      f'const SHI_VERSION = \'{VERSION}\';\n'
       '// Verwendung in jedem Symbolfeld: shi:<name>, z. B. shi:waermepumpe\n'
       'const SHI_ICONS = ' + json.dumps(mono, separators=(',', ':')) + ';\n'
       'window.customIcons = window.customIcons || {};\n'
@@ -79,6 +81,6 @@ js = ('// Smart-Home-Icons für Home Assistant – automatisch erzeugt von tools
       '  getIcon: async (name) => ({ path: SHI_ICONS[name] || \'\' }),\n'
       '  getIconList: async () => Object.keys(SHI_ICONS).map((name) => ({ name })),\n'
       '};\n'
-      'console.info(\'%c SMART-HOME-ICONS %c \' + Object.keys(SHI_ICONS).length + \' Symbole (shi:) \', \'background:#5B9BD5;color:#000;font-weight:bold\', \'background:#C6E0B4;color:#000\');\n')
+      'console.info(\'%c SMART-HOME-ICONS %c \' + SHI_VERSION + \' · \' + Object.keys(SHI_ICONS).length + \' Symbole (shi:) \', \'background:#5B9BD5;color:#000;font-weight:bold\', \'background:#C6E0B4;color:#000\');\n')
 (R / 'smart-home-icons.js').write_text(js)
 print(len(names), 'Symbole gebaut')
