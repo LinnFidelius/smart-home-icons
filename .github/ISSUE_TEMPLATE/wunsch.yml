@@ -1,0 +1,21 @@
+name: Änderungswunsch
+description: Idee oder Wunsch für eine neue Funktion oder ein neues Symbol
+labels: [Wunsch]
+body:
+  - type: textarea
+    id: wunsch
+    attributes:
+      label: Was wünschst du dir?
+      description: Beschreibe kurz, was sich ändern oder dazukommen soll.
+    validations:
+      required: true
+  - type: textarea
+    id: grund
+    attributes:
+      label: Wofür brauchst du das?
+      description: Optional – hilft bei der Umsetzung.
+  - type: textarea
+    id: bild
+    attributes:
+      label: Screenshot oder Skizze
+      description: Optional – einfach per Drag & Drop einfügen.

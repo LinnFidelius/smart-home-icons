@@ -24,6 +24,10 @@ Symbole für Smart Home, Energie, Homeserver, Getränke und Essen im einheitlich
 
 `python3 tools/build.py` erzeugt PNGs, Cricut-Dateien und die Übersicht aus `src` (benötigt `cairosvg`, `picosvg`, `Pillow`).
 
+## Feedback
+
+Wünsche und Fehler gerne über [Issues](../../issues/new/choose) melden (GitHub-Konto nötig). In der Energiefluss Card führt auch der Link unten im Karten-Editor dorthin.
+
 ## Hinweise
 
 - Alle Symbole wurden mit Claude (KI von Anthropic) erstellt und vom Betreiber des Repositorys geprüft.

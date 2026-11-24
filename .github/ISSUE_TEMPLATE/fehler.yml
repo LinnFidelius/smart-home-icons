@@ -1,0 +1,22 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie erwartet
+labels: [Fehler]
+body:
+  - type: textarea
+    id: fehler
+    attributes:
+      label: Was ist passiert?
+      description: Was hast du erwartet und was ist stattdessen passiert?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Steht unten im Karten-Editor bzw. in der Browser-Konsole.
+  - type: textarea
+    id: config
+    attributes:
+      label: Konfiguration (YAML)
+      description: Optional – bitte keine persönlichen Daten.
+      render: yaml
