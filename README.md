@@ -1,17 +1,28 @@
 # Smart-Home-Icons
 
-Symbole für Smart Home, Energie, Homeserver, Getränke und Essen im einheitlichen Stil: jedes Symbol isometrisch (3D), flach (2D) und als einfarbige Linie im Stil der Home-Assistant-Icons.
+Zwei Rubriken im einheitlichen Farbstil:
 
-![Übersicht](docs/uebersicht.png)
+- **Symbole** für Smart Home, Energie, Homeserver, Getränke und Essen: jedes Symbol isometrisch (3D), flach (2D) und als einfarbige Linie im Stil der Home-Assistant-Icons, 3D und 2D auch ohne Hintergrund.
+- **Icons** in vereinfachtem, flachem Stil, z. B. als App-Icons: 2D mit und ohne Sockel.
+
+![Übersicht Symbole](docs/uebersicht.png)
+
+![Übersicht Icons](docs/icons.png)
 
 ## Formate
 
 | Ordner | Inhalt |
 |---|---|
-| `src/3d`, `src/2d` | farbige SVG-Quellen (200 × 200), frei skalierbar |
-| `src/mono` | einfarbige Linien-Icons (24 × 24, `currentColor`) |
-| `png/3d`, `png/2d`, `png/mono` | PNG in 64 und 256 px |
-| `cricut` | 2D-Variante für Schneideplotter (z. B. Cricut): nur Flächen, eine Ebene je Farbe, 100 mm groß |
+| `src/3d`, `src/2d` | Symbole: farbige SVG-Quellen (200 × 200), frei skalierbar; 3D als echte Isometrie |
+| `src/mono` | Symbole: einfarbige Linien-Icons (24 × 24, `currentColor`), Grundlage für Home Assistant (`shi:`) |
+| `frei/3d`, `frei/2d` | Symbole ohne Hintergrund (3D ohne Bodenplatte, 2D ohne Sockel), automatisch erzeugt |
+| `png/3d`, `png/2d`, `png/3d-frei`, `png/2d-frei`, `png/mono` | PNG in 64 und 256 px |
+| `cricut` | Symbole in 2D für Schneideplotter (z. B. Cricut): nur Flächen, eine Ebene je Farbe, 100 mm groß |
+| `icons/src` | Icons: farbige SVG-Quellen (200 × 200) mit Sockel |
+| `icons/frei` | Icons ohne Sockel, automatisch erzeugt |
+| `icons/png/2d`, `icons/png/2d-frei` | Icons als PNG in 64 und 256 px |
+| `icons/png/app` | Icons auf weißem Grund in 1024 px, Ausgangsbild für App-Icons |
+| `icons/cricut` | Icons für Schneideplotter, wie `cricut` |
 
 ## Verwendung
 
@@ -22,7 +33,7 @@ Symbole für Smart Home, Energie, Homeserver, Getränke und Essen im einheitlich
 
 ## Bauen
 
-`python3 tools/build.py` erzeugt PNGs, Cricut-Dateien und die Übersicht aus `src` (benötigt `cairosvg`, `picosvg`, `Pillow`).
+`python3 tools/build.py` erzeugt PNGs, Varianten ohne Hintergrund, Cricut-Dateien und die Übersichten aus `src` und `icons/src` (benötigt `cairosvg`, `picosvg`, `Pillow`).
 
 ## Feedback
 

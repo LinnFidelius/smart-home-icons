@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Erzeugt aus src: PNGs (64/256 px), Cricut-SVGs (nur Flächen, eine Ebene je Farbe), docs/uebersicht.png,
-sowie aus src/mono die Pfade für Home Assistant (smart-home-icons.js, dist/mono-paths.json)."""
+"""Erzeugt aus src (Symbole): PNGs (64/256 px), Varianten ohne Hintergrund (frei/), Cricut-SVGs (nur Flächen,
+eine Ebene je Farbe), docs/uebersicht.png, sowie aus src/mono die Pfade für Home Assistant (smart-home-icons.js,
+dist/mono-paths.json). Aus icons/src (Icons, vereinfachter Stil): PNGs mit und ohne Sockel, Cricut, docs/icons.png."""
 import pathlib, re, sys, io, json
 import cairosvg
 from picosvg.svg import SVG
@@ -8,6 +9,17 @@ from PIL import Image, ImageDraw, ImageFont
 
 R = pathlib.Path(__file__).resolve().parent.parent
 SIZES = (64, 256)
+
+def frei(svg, style):
+    """Variante ohne Hintergrund: 2D ohne Sockel, 3D ohne Bodenplatte (und ohne Tafel, falls noch vorhanden)."""
+    if style == '2d':
+        return re.sub(r'<rect x="16" y="1(50|64)"[^>]*/>', '', svg, count=2)
+    polys = re.findall(r'<polygon[^>]*/>', svg)
+    for p in polys[:3]: svg = svg.replace(p, '', 1)
+    rest = polys[3:6]
+    if len(rest) == 3 and all(f'fill="{c}"' in p for p, c in zip(rest, ('#FFFFFF', '#C9CCD3', '#F7F7F7'))):
+        for p in rest: svg = svg.replace(p, '', 1)
+    return svg
 
 def png(src, out, size):
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -27,7 +39,8 @@ def cricut(src, out):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100mm" height="100mm">{body}</svg>')
 
-def sheet(names, out):
+def sheet(names, out, styles=('3d', '2d'), base=None, mono=True):
+    base = base or (R / 'src')
     cell, cols = 150, 8
     rows = (len(names) + cols - 1) // cols
     img = Image.new('RGB', (cols * cell, rows * (cell * 2 + 84)), '#1c1c1c')
@@ -36,13 +49,13 @@ def sheet(names, out):
     except OSError: font = ImageFont.load_default()
     for i, n in enumerate(names):
         x, y = (i % cols) * cell, (i // cols) * (cell * 2 + 84)
-        for j, style in enumerate(('3d', '2d')):
-            f = R / 'src' / style / f'{n}.svg'
+        for j, style in enumerate(styles):
+            f = base / style / f'{n}.svg'
             if f.exists():
                 im = Image.open(io.BytesIO(cairosvg.svg2png(url=str(f), output_width=cell - 20, output_height=cell - 20))).convert('RGBA')
                 img.paste(im, (x + 10, y + 10 + j * cell), im)
         f = R / 'src' / 'mono' / f'{n}.svg'
-        if f.exists():
+        if mono and f.exists():
             im = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=f.read_text().replace('currentColor', '#E1E1E1').encode(), output_width=48, output_height=48))).convert('RGBA')
             img.paste(im, (x + (cell - 48) // 2, y + cell * 2 + 6), im)
         w = d.textlength(n, font=font)
@@ -61,9 +74,25 @@ names = sorted({p.stem for p in (R / 'src').glob('*/*.svg')})
 for style in ('3d', '2d'):
     for f in sorted((R / 'src' / style).glob('*.svg')):
         for s in SIZES: png(f, R / 'png' / style / str(s) / f'{f.stem}.png', s)
+        fr = R / 'frei' / style / f'{f.stem}.svg'; fr.parent.mkdir(parents=True, exist_ok=True)
+        fr.write_text(frei(f.read_text(), style))
+        for s in SIZES: png(fr, R / 'png' / f'{style}-frei' / str(s) / f'{f.stem}.png', s)
+# Icons (vereinfachter Stil): 2D mit Sockel, ohne Sockel, Cricut, App-Icon-Quelle 1024 px auf Weiß
+I = R / 'icons'
+for f in sorted((I / 'src').glob('*.svg')):
+    fr = I / 'frei' / f'{f.stem}.svg'; fr.parent.mkdir(parents=True, exist_ok=True)
+    fr.write_text(frei(f.read_text(), '2d'))
+    for s in SIZES:
+        png(f, I / 'png' / '2d' / str(s) / f'{f.stem}.png', s)
+        png(fr, I / 'png' / '2d-frei' / str(s) / f'{f.stem}.png', s)
+    weiss = f.read_text().replace('viewBox="0 0 200 200">', 'viewBox="0 0 200 200"><rect width="200" height="200" fill="#FFFFFF"/>', 1)
+    out = I / 'png' / 'app' / f'{f.stem}-1024.png'; out.parent.mkdir(parents=True, exist_ok=True)
+    cairosvg.svg2png(bytestring=weiss.encode(), write_to=str(out), output_width=1024, output_height=1024)
+    cricut(f, I / 'cricut' / f'{f.stem}.svg')
 for f in sorted((R / 'src' / '2d').glob('*.svg')):
     cricut(f, R / 'cricut' / f'{f.stem}.svg')
 sheet(names, R / 'docs' / 'uebersicht.png')
+sheet(sorted(p.stem for p in (I / 'src').glob('*.svg')), R / 'docs' / 'icons.png', styles=('src', 'frei'), base=I, mono=False)
 mono = {f.stem: mono_path(f) for f in sorted((R / 'src' / 'mono').glob('*.svg'))}
 (R / 'dist').mkdir(exist_ok=True)
 (R / 'dist' / 'mono-paths.json').write_text(json.dumps(mono, separators=(',', ':')))
