@@ -29,13 +29,14 @@ def cricut(src, out):
     # Konturen in Flächen umwandeln, Transformationen auflösen, Pfade nach Farbe gruppieren
     pico = SVG.parse(str(src)).topicosvg(allow_text=False)
     paths = re.findall(r'<path[^>]*/>', pico.tostring())
-    groups = {}
-    for p in paths:
+    groups, last = {}, {}
+    for i, p in enumerate(paths):
         m = re.search(r'fill="(#[0-9A-Fa-f]{3,6})"', p)
         col = (m.group(1) if m else '#000000').upper()
         p = re.sub(r'\s(fill-opacity|opacity)="[^"]*"', '', p)
-        groups.setdefault(col, []).append(p)
-    body = ''.join(f'<g id="ebene-{c[1:]}" fill="{c}">' + ''.join(groups[c]) + '</g>' for c in groups)
+        groups.setdefault(col, []).append(p); last[col] = i
+    # Ebenen nach dem letzten Vorkommen ordnen, damit obenliegende Details (z. B. Leisten auf weißen Flächen) oben bleiben
+    body = ''.join(f'<g id="ebene-{c[1:]}" fill="{c}">' + ''.join(groups[c]) + '</g>' for c in sorted(groups, key=last.get))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100mm" height="100mm">{body}</svg>')
 
